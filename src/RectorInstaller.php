@@ -2,38 +2,27 @@
 
 namespace PoolsPhp\Pools;
 
-use PoolsPhp\Pools\Contracts\PackageInstaller;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
 final readonly class RectorInstaller implements Contracts\PackageInstaller
 {
-
-
-
-    public function install(OutputInterface $output): bool
+    public function install(): bool
     {
 
-        $output->writeln('<info>Installing Rector...</info>');
+        $output = [];
 
         $process = new Process(['composer', 'require', 'rector/rector', '--dev']);
         $process->setTimeout(null);
 
         try {
-            $process->mustRun(function ($type, $buffer) use ($output) {
-                $output->write("<info>$buffer</info>");
+            $process->mustRun(function ($type, $buffer) use (&$output): void {
+                $output[] = $buffer;
             });
-        } catch (\Exception $e) {
-            $output->writeln("<error>Failed to install Rector</error>");
+        } catch (\Exception) {
             return false;
         }
 
-        $output->writeln("<info>Rector installed successfully</info>");
         return true;
-
-
-
 
     }
 }

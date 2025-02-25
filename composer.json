@@ -1,12 +1,12 @@
 {
-    "name": "nunomaduro/skeleton-php",
-    "description": "A skeleton repository for my packages",
-    "keywords": ["php", "skeleton", "package"],
+    "name": "pools-php/pools",
+    "description": "A simple and fast implementation of a thread pool in PHP",
+    "keywords": ["php", "tools", "package"],
     "license": "MIT",
     "authors": [
         {
-            "name": "Nuno Maduro",
-            "email": "enunomaduro@gmail.com"
+            "name": "Francisco Barrento",
+            "email": "francisco.barrento@gmail.com"
         }
     ],
     "require": {

@@ -7,8 +7,5 @@ test('it installs rector', function (): void {
     $output = $rectorInstaller->install();
 
     expect($output)
-        ->dd($output)
-        ->toBeString()
-        ->and($output)
-        ->toContain('rector/rector');
+        ->toBeTrue();
 });
