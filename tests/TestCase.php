@@ -19,7 +19,7 @@ abstract class TestCase extends BaseTestCase
 {
     protected ComposerManager $reader;
 
-    protected string $fixturesPath = __DIR__.'/fixtures';
+    protected string $fixturesPath = __DIR__ . '/fixtures';
 
     protected ArrayInput $input;
 

@@ -7,7 +7,7 @@ use PoolsPhp\Pools\ComposerManager;
 use PoolsPhp\Pools\Exceptions\NoComposerException;
 
 beforeEach(function (): void {
-    $this->fixturesPath = __DIR__.'/../Fixtures';
+    $this->fixturesPath = __DIR__ . '/../fixtures';
     $this->manager = new ComposerManager($this->fixturesPath.'/composer.json');
 });
 
