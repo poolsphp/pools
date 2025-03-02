@@ -6,4 +6,3 @@ parameters:
     excludePaths:
         - tests/*      # Excludes all files in tests directory
         - tests/**/*   # Excludes all files in subdirectories of tests
-

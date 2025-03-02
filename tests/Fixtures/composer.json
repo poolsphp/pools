@@ -1,6 +1,6 @@
 {
     "name": "pools-php/pools",
-    "description": "A simple and fast implementation of a thread pool in PHP",
+    "description": "A simple",
     "keywords": ["php", "tools", "package"],
     "license": "MIT",
     "authors": [
@@ -11,18 +11,10 @@
     ],
     "require": {
         "php": "^8.3.0",
-        "composer/composer": "^2.8",
         "symfony/console": "^7.2",
         "symfony/process": "^7.2"
     },
     "require-dev": {
-        "laravel/pint": "^1.21",
-        "mockery/mockery": "^1.6",
-        "pestphp/pest": "^3.7",
-        "pestphp/pest-plugin-type-coverage": "^3.1",
-        "phpstan/phpstan": "^1.12",
-        "rector/rector": "^1.2",
-        "symfony/var-dumper": "^7.1.6"
     },
     "autoload": {
         "psr-4": {
@@ -42,19 +34,5 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
-    },
-    "scripts": {
-        "refacto": "rector",
-        "lint": "pint",
-        "test:refacto": "rector --dry-run",
-        "test:lint": "pint --test",
-        "test:types": "phpstan analyse --ansi",
-        "test:unit": "pest --colors=always --coverage --min=100",
-        "test": [
-            "@test:refacto",
-            "@test:lint",
-            "@test:types",
-            "@test:unit"
-        ]
     }
 }

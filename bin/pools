@@ -3,12 +3,16 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use PoolsPhp\Pools\Commands\InstallRectorCommand;
+use PoolsPhp\Pools\Console\Commands\DefaultCommand;
 use Symfony\Component\Console\Application;
 
-$application = new Application();
+$application = new Application(
+    'PoolsPhp',
+    '0.0.1'
+);
 
-$application->add(new InstallRectorCommand());
+$application->add(new DefaultCommand());
+$application->setDefaultCommand('default', true);
 
 try {
     $application->run();
