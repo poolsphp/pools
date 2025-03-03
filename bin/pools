@@ -8,12 +8,12 @@ if (file_exists(__DIR__.'/../../../autoload.php')) {
 }
 
 use Pools\Console\Commands\DefaultCommand;
-use Pools\Console\Commands\InstallerCommand;
+use Pools\Console\Commands\InstallCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application('Pools', '0.0.1');
 
 $application->add(new DefaultCommand());
-$application->add(new InstallerCommand());
+$application->add(new InstallCommand());
 
 $application->run();
