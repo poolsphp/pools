@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PoolsPhp\Pools\ValueObjects;
+namespace Pools\ValueObjects;
 
-use PoolsPhp\Pools\ComposerManager;
-use PoolsPhp\Pools\PHPPackageInstaller;
+use Pools\ComposerManager;
+use Pools\PHPPackageInstaller;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;

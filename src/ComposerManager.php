@@ -9,7 +9,7 @@ use Composer\Factory;
 use Composer\IO\NullIO;
 use Composer\Package\Link;
 use Composer\PartialComposer;
-use PoolsPhp\Pools\Exceptions\NoComposerException;
+use Pools\Exceptions\NoComposerException;
 
 use function file_exists;
 use function getcwd;

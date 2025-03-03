@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PoolsPhp\Pools\Contracts;
+namespace Pools\Contracts;
 
 use Symfony\Component\Console\Output\OutputInterface;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PoolsPhp\Pools\Concerns\Packages;
+namespace Pools\Concerns\Packages;
 
 trait InteractsWithStubs
 {

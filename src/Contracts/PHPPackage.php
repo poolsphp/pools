@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PoolsPhp\Pools\Contracts;
+namespace Pools\Contracts;
 
 /**
  * @property-read string $name      Package display name

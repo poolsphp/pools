@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace PoolsPhp\Pools\Console\Commands;
+namespace Pools\Console\Commands;
 
 use Exception;
-use PoolsPhp\Pools\ComposerManager;
-use PoolsPhp\Pools\Exceptions\InstallationException;
-use PoolsPhp\Pools\Exceptions\NoComposerException;
-use PoolsPhp\Pools\Packages\PestPackage;
-use PoolsPhp\Pools\Packages\PhpStanPackage;
-use PoolsPhp\Pools\Packages\PHPUnitPackage;
-use PoolsPhp\Pools\Packages\PintPackage;
-use PoolsPhp\Pools\Packages\RectorPackage;
-use PoolsPhp\Pools\PHPPackageInstaller;
-use PoolsPhp\Pools\ValueObjects\PackagePayload;
+use Pools\ComposerManager;
+use Pools\Exceptions\InstallationException;
+use Pools\Exceptions\NoComposerException;
+use Pools\Packages\PestPackage;
+use Pools\Packages\PhpStanPackage;
+use Pools\Packages\PHPUnitPackage;
+use Pools\Packages\PintPackage;
+use Pools\Packages\RectorPackage;
+use Pools\PHPPackageInstaller;
+use Pools\ValueObjects\PackagePayload;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

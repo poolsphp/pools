@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace PoolsPhp\Pools;
 
 use Exception;
-use PoolsPhp\Pools\Contracts\Installer;
-use PoolsPhp\Pools\Contracts\PHPPackage;
-use PoolsPhp\Pools\Exceptions\InstallationException;
-use PoolsPhp\Pools\Exceptions\NoComposerException;
+use Pools\Contracts\Installer;
+use Pools\Contracts\PHPPackage;
+use Pools\Exceptions\InstallationException;
+use Pools\Exceptions\NoComposerException;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;

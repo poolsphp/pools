@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PoolsPhp\Pools\Exceptions;
+namespace Pools\Exceptions;
 
 use Exception;
 

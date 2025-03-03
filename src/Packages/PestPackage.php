@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace PoolsPhp\Pools\Packages;
+namespace Pools\Packages;
 
-use PoolsPhp\Pools\Concerns\Packages\InteractsWithStubs;
-use PoolsPhp\Pools\Contracts\PHPPackage;
-use PoolsPhp\Pools\Exceptions\NoComposerException;
-use PoolsPhp\Pools\ValueObjects\PackagePayload;
+use Pools\Concerns\Packages\InteractsWithStubs;
+use Pools\Contracts\PHPPackage;
+use Pools\Exceptions\NoComposerException;
+use Pools\ValueObjects\PackagePayload;
 
 final class PestPackage implements PHPPackage
 {
