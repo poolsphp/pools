@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use PoolsPhp\Pools\Concerns\Packages\InteractsWithStubs;
-use PoolsPhp\Pools\Contracts\PHPPackage;
+use Pools\Concerns\Packages\InteractsWithStubs;
+use Pools\Contracts\PHPPackage;
 
 arch('packages')
-    ->expect('PoolsPhp\Pools\Packages')
+    ->expect('Pools\Packages')
     ->toHaveSuffix('Package')
     ->toHaveConstructor()
     ->toUseTrait(InteractsWithStubs::class)

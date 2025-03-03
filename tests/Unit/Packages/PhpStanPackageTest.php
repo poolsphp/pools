@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use PoolsPhp\Pools\Packages\PHPUnitPackage;
+use Pools\Packages\PHPUnitPackage;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 test('packages can be configured', function (): void {

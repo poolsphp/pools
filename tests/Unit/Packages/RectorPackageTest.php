@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use PoolsPhp\Pools\Packages\RectorPackage;
+use Pools\Packages\RectorPackage;
 
 beforeEach(function (): void {
 

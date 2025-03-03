@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use PoolsPhp\Pools\Console\Commands\DefaultCommand;
+use Pools\Console\Commands\DefaultCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 

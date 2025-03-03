@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use Composer\Composer;
-use PoolsPhp\Pools\ComposerManager;
-use PoolsPhp\Pools\Exceptions\NoComposerException;
+use Pools\ComposerManager;
+use Pools\Exceptions\NoComposerException;
 
 beforeEach(function (): void {
-    $this->fixturesPath = __DIR__ . '/../fixtures';
+    $this->fixturesPath = __DIR__.'/../fixtures';
     $this->manager = new ComposerManager($this->fixturesPath.'/composer.json');
 });
 

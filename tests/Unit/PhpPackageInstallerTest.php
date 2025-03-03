@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use PoolsPhp\Pools\ComposerManager;
-use PoolsPhp\Pools\Packages\PestPackage;
-use PoolsPhp\Pools\Packages\PHPUnitPackage;
-use PoolsPhp\Pools\Packages\PintPackage;
-use PoolsPhp\Pools\Packages\RectorPackage;
-use PoolsPhp\Pools\PHPPackageInstaller;
+use Pools\ComposerManager;
+use Pools\Packages\PestPackage;
+use Pools\Packages\PHPUnitPackage;
+use Pools\Packages\PintPackage;
+use Pools\Packages\RectorPackage;
+use Pools\PHPPackageInstaller;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 test('install returns true if there are no packages to install', function (): void {

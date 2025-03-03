@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PoolsPhp\Pools;
+namespace Pools;
 
 use Exception;
 use Pools\Contracts\Installer;

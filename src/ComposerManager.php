@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PoolsPhp\Pools;
+namespace Pools;
 
 use Composer\Composer;
 use Composer\Factory;

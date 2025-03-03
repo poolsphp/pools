@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pools\Concerns\Console;
 
 use Closure;
@@ -15,42 +17,41 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * @codeCoverageIgnore
+ */
 trait InteractsWithPrompts
 {
     /**
      * Configure the prompt fallbacks.
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return void
      */
     protected function configurePrompts(InputInterface $input, OutputInterface $output): void
     {
         Prompt::fallbackWhen(! $input->isInteractive() || PHP_OS_FAMILY === 'Windows');
 
         TextPrompt::fallbackUsing(fn (TextPrompt $prompt) => $this->promptUntilValid(
-            fn () => (new SymfonyStyle($input, $output))->ask($prompt->label, $prompt->default ?: null) ?? '',
+            fn (): mixed => (new SymfonyStyle($input, $output))->ask($prompt->label, $prompt->default !== '' && $prompt->default !== '0' ? $prompt->default : null) ?? '',
             $prompt->required,
             $prompt->validate,
             $output
         ));
 
         PasswordPrompt::fallbackUsing(fn (PasswordPrompt $prompt) => $this->promptUntilValid(
-            fn () => (new SymfonyStyle($input, $output))->askHidden($prompt->label) ?? '',
+            fn (): mixed => (new SymfonyStyle($input, $output))->askHidden($prompt->label) ?? '',
             $prompt->required,
             $prompt->validate,
             $output
         ));
 
         ConfirmPrompt::fallbackUsing(fn (ConfirmPrompt $prompt) => $this->promptUntilValid(
-            fn () => (new SymfonyStyle($input, $output))->confirm($prompt->label, $prompt->default),
+            fn (): bool => (new SymfonyStyle($input, $output))->confirm($prompt->label, $prompt->default),
             $prompt->required,
             $prompt->validate,
             $output
         ));
 
         SelectPrompt::fallbackUsing(fn (SelectPrompt $prompt) => $this->promptUntilValid(
-            fn () => (new SymfonyStyle($input, $output))->choice($prompt->label, $prompt->options, $prompt->default),
+            fn (): mixed => (new SymfonyStyle($input, $output))->choice($prompt->label, $prompt->options, $prompt->default),
             false,
             $prompt->validate,
             $output
@@ -59,7 +60,7 @@ trait InteractsWithPrompts
         MultiSelectPrompt::fallbackUsing(function (MultiSelectPrompt $prompt) use ($input, $output) {
             if ($prompt->default !== []) {
                 return $this->promptUntilValid(
-                    fn () => (new SymfonyStyle($input, $output))->choice($prompt->label, $prompt->options, implode(',', $prompt->default), true),
+                    fn (): mixed => (new SymfonyStyle($input, $output))->choice($prompt->label, $prompt->options, implode(',', $prompt->default), true),
                     $prompt->required,
                     $prompt->validate,
                     $output
@@ -99,14 +100,8 @@ trait InteractsWithPrompts
 
     /**
      * Prompt the user until the given validation callback passes.
-     *
-     * @param  Closure  $prompt
-     * @param  bool|string  $required
-     * @param  Closure|null  $validate
-     * @param OutputInterface $output
-     * @return mixed
      */
-    protected function promptUntilValid(Closure $prompt, bool $required, ?Closure $validate, OutputInterface $output): mixed
+    protected function promptUntilValid(Closure $prompt, bool|string $required, ?Closure $validate, OutputInterface $output): mixed
     {
         while (true) {
             $result = $prompt();
@@ -117,10 +112,10 @@ trait InteractsWithPrompts
                 continue;
             }
 
-            if ($validate) {
+            if ($validate instanceof Closure) {
                 $error = $validate($result);
 
-                if (is_string($error) && strlen($error) > 0) {
+                if (is_string($error) && mb_strlen($error) > 0) {
                     $output->writeln("<error>{$error}</error>");
 
                     continue;

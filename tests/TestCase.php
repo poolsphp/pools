@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tests;
 
 use PHPUnit\Framework\TestCase as BaseTestCase;
-use PoolsPhp\Pools\ComposerManager;
-use PoolsPhp\Pools\Exceptions\NoComposerException;
-use PoolsPhp\Pools\PHPPackageInstaller;
-use PoolsPhp\Pools\ValueObjects\PackagePayload;
+use Pools\ComposerManager;
+use Pools\Exceptions\NoComposerException;
+use Pools\PHPPackageInstaller;
+use Pools\ValueObjects\PackagePayload;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Filesystem;
@@ -19,7 +19,7 @@ abstract class TestCase extends BaseTestCase
 {
     protected ComposerManager $reader;
 
-    protected string $fixturesPath = __DIR__ . '/fixtures';
+    protected string $fixturesPath = __DIR__.'/fixtures';
 
     protected ArrayInput $input;
 

@@ -1,7 +1,8 @@
 <?php
 
-namespace Pools\Console\Commands;
+declare(strict_types=1);
 
+namespace Pools\Console\Commands;
 
 use Pools\Concerns\Console\InteractsWithPrompts;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -9,14 +10,12 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use function dump;
+
 use function Laravel\Prompts\multiselect;
-use function Laravel\Prompts\select;
 
 #[AsCommand(name: 'install')]
-class InstallCommand extends Command
+final class InstallCommand extends Command
 {
-
     use InteractsWithPrompts;
 
     protected function configure(): void
@@ -30,6 +29,7 @@ class InstallCommand extends Command
             ->addOption('rector', null, InputOption::VALUE_NONE, 'Installs Rector');
     }
 
+    /** @codeCoverageIgnore  */
     protected function interact(InputInterface $input, OutputInterface $output): void
     {
 
@@ -38,9 +38,7 @@ class InstallCommand extends Command
         $this->configurePrompts($input, $output);
 
         $this->displayPoolsLogo($output);
-
-        $packages = [];
-        if (!$input->getOption('all') && !$input->getOption('phpstan') && !$input->getOption('pest') && !$input->getOption('pint') && !$input->getOption('rector') ) {
+        if (! $input->getOption('all') && ! $input->getOption('phpstan') && ! $input->getOption('pest') && ! $input->getOption('pint') && ! $input->getOption('rector')) {
 
             $packages = multiselect(
                 label: 'Which packages would you like to install?',
@@ -50,7 +48,6 @@ class InstallCommand extends Command
                     'pint' => 'Pint',
                     'rector' => 'Rector',
                 ],
-                default: []
             );
 
             foreach ($packages as $package) {
@@ -63,8 +60,6 @@ class InstallCommand extends Command
             $input->setOption('pint', true);
             $input->setOption('rector', true);
         }
-
-        dump($input->getOptions());
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -73,6 +68,7 @@ class InstallCommand extends Command
         return Command::SUCCESS;
     }
 
+    /** @codeCoverageIgnore  */
     private function displayPoolsLogo(OutputInterface $output): void
     {
         $logo = <<<EOT
@@ -84,8 +80,6 @@ class InstallCommand extends Command
     </>
 EOT;
 
-        $output->write($logo . PHP_EOL);
+        $output->write($logo.PHP_EOL);
     }
-
-
 }
