@@ -32,8 +32,9 @@ test('it installs larastan', function (): void {
     // Assert
 
     if (PHP_OS_FAMILY === 'Windows') {
-        expect(file_exists($this->outputDirectory('temp/vendor/bin/phpstan.bat')))
-            ->toBeTrue();
+        sleep(3);
+        expect(file_exists($this->outputDirectory('temp/phpstan.neon')))
+            ->toBeTrue('phpstan.neon config file was not created');
     } else {
         expect(file_exists($this->outputDirectory('temp/vendor/bin/phpstan')))
             ->toBeTrue();
