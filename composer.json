@@ -1,5 +1,5 @@
 {
-    "name": "pools-php/pools",
+    "name": "poolsphp/pools",
     "description": "A simple and fast implementation of a thread pool in PHP",
     "keywords": ["php", "tools", "package"],
     "license": "MIT",
