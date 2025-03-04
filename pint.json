@@ -1,7 +1,7 @@
 {
     "preset": "laravel",
     "notPath": [
-        "src/Packages/AbstractPHPPackage.php"
+        "test-output"
     ],
     "rules": {
         "array_push": true,

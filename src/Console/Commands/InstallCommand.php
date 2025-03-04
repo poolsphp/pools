@@ -42,12 +42,12 @@ final class InstallCommand extends Command
         $this->setNAme('install')
             ->setDescription('Installs and configures Modern PHP tools for your project')
             ->addOption('all', null, InputOption::VALUE_NONE, 'Installs all packages')
-            ->addOption('overwrite-all', null,InputOption::VALUE_NONE, 'Overwrites all existing configurations')
+            ->addOption('overwrite-all', null, InputOption::VALUE_NONE, 'Overwrites all existing configurations')
             ->addOption('phpstan', null, InputOption::VALUE_NONE, 'Installs PHPStan')
             ->addOption('type-check-level', null, InputOption::VALUE_NONE, 'Sets the PHPStan level')
             ->addOption('overwrite-phpstan', null, InputOption::VALUE_NONE, 'Overwrites the existing PHPStan|Larastan configuration')
             ->addOption('pest', null, InputOption::VALUE_NONE, 'Installs Pest')
-            ->addOption('overwrite-pest', null,InputOption::VALUE_NONE, 'Overwrites existing Pest configuration')
+            ->addOption('overwrite-pest', null, InputOption::VALUE_NONE, 'Overwrites existing Pest configuration')
             ->addOption('pint', null, InputOption::VALUE_NONE, 'Installs Pint')
             ->addOption('overwrite-pint', null, InputOption::VALUE_NONE, 'Overwrites existing pint configuration')
             ->addOption('rector', null, InputOption::VALUE_NONE, 'Installs Rector')
@@ -100,45 +100,43 @@ final class InstallCommand extends Command
             $input->setOption('overwrite-pest', true);
         }
 
-        if(!$input->getOption('overwrite-all') && ($this->rectorConfigExists($directory) || $this->pintConfigExists($directory) || $this->typeCheckConfigExists($directory)) ) {
+        if (! $input->getOption('overwrite-all') && ($this->rectorConfigExists($directory) || $this->pintConfigExists($directory) || $this->typeCheckConfigExists($directory))) {
             $input->setOption(
                 'overwrite-all',
                 confirm(
                     label: 'Would you like to overwrite all existing configuration?',
-                    hint:  'Caution: This options will overwrite all existing configuration files.'
+                    hint: 'Caution: This options will overwrite all existing configuration files.'
                 )
             );
         }
 
-
-        if (!$input->getOption('overwrite-all') && $input->getOption('phpstan') && $this->typeCheckConfigExists($directory) && ! $input->getOption('overwrite-phpstan')) {
+        if (! $input->getOption('overwrite-all') && $input->getOption('phpstan') && $this->typeCheckConfigExists($directory) && ! $input->getOption('overwrite-phpstan')) {
             $input->setOption(
                 'overwrite-phpstan',
                 confirm('Would you like to overwrite the existing PHPStan|Larastan configuration?')
             );
         }
 
-        if(!$input->getOption('overwrite-all') && $input->getOption('pint') && $this->pintConfigExists($directory)) {
+        if (! $input->getOption('overwrite-all') && $input->getOption('pint') && $this->pintConfigExists($directory)) {
             $input->setOption(
                 'overwrite-pint',
                 confirm('Would you like to overwrite the existing Pint configuration?')
             );
         }
 
-        if(!$input->getOption('overwrite-all') && $input->getOption('rector') && $this->rectorConfigExists($directory)) {
+        if (! $input->getOption('overwrite-all') && $input->getOption('rector') && $this->rectorConfigExists($directory)) {
             $input->setOption(
                 'overwrite-rector',
                 confirm('Would you like to overwrite the existing Rector configuration?')
             );
         }
 
-        if(!$input->getOption('overwrite-all') && $input->getOption('pest') && $this->pestIsInstalled($directory)) {
+        if (! $input->getOption('overwrite-all') && $input->getOption('pest') && $this->pestIsInstalled($directory)) {
             $input->setOption(
                 'overwrite-pest',
                 confirm('Would you like to overwrite the existing Pest configuration?')
             );
         }
-
 
         $this->init($directory);
     }
@@ -156,15 +154,15 @@ final class InstallCommand extends Command
             $this->installPhpStan($directory, $input, $output);
         }
 
-        if($input->getOption('pint')) {
+        if ($input->getOption('pint')) {
             $this->installPint($directory, $input, $output);
         }
 
-        if($input->getOption('rector')) {
+        if ($input->getOption('rector')) {
             $this->installRector($directory, $input, $output);
         }
 
-        if($input->getOption('pest')) {
+        if ($input->getOption('pest')) {
             $this->installPest($directory, $input, $output);
         }
 
@@ -189,19 +187,19 @@ final class InstallCommand extends Command
         $commands = [
             $composerBinary.' remove phpunit/phpunit --dev --no-update',
             $composerBinary.' require pestphp/pest pestphp/pest-plugin-faker pestphp/pest-plugin-watch  --with-all-dependencies --dev --no-update',
-            $composerBinary. ' update',
+            $composerBinary.' update',
         ];
 
-        if($input->getOption('overwrite-pest') && $this->pestIsInstalled($directory)) {
+        if ($input->getOption('overwrite-pest') && $this->pestIsInstalled($directory)) {
             $fs = new Filesystem();
             $fs->delete($directory.'/phpunit.xml');
             $fs->delete($directory.'/tests/Pest.php');
             $fs->delete($directory.'/tests/TestCase.php');
             $fs->delete($directory.'/tests/Unit/ExampleTest.php');
             $fs->delete($directory.'/tests/Feature/ExampleTest.php');
-            $commands[] =  $this->phpBinary().' ./vendor/bin/pest --init';
-        } elseif(!$this->pestIsInstalled($directory)) {
-            $commands[] =  $this->phpBinary().' ./vendor/bin/pest --init';
+            $commands[] = $this->phpBinary().' ./vendor/bin/pest --init';
+        } elseif (! $this->pestIsInstalled($directory)) {
+            $commands[] = $this->phpBinary().' ./vendor/bin/pest --init';
         }
 
         $this->runCommands($commands, $output, $directory);
@@ -242,7 +240,7 @@ final class InstallCommand extends Command
         }
     }
 
-    protected function phpBinary(): string
+    private function phpBinary(): string
     {
         $phpBinary = function_exists('Illuminate\Support\php_binary')
             ? php_binary()
@@ -316,22 +314,20 @@ final class InstallCommand extends Command
         return file_exists($directory.'/pint.json');
     }
 
-
-    private function  copyPintStubs(string $directory): void
+    private function copyPintStubs(string $directory): void
     {
         $this->replaceFile(
             'pint/pint.json',
             $directory.'/pint.json'
         );
 
-        if(!$this->isLaravelApp) {
+        if (! $this->isLaravelApp) {
             $this->replaceInFile(
                 '"preset": "laravel"',
-                "",
+                '',
                 $directory.'/pint.json'
             );
         }
-
 
     }
 
