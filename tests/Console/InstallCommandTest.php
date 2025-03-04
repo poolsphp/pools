@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Pools\Console\Commands\InstallCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Illuminate\Filesystem\Filesystem;
 
 test('it installs larastan', function (): void {
 
@@ -30,7 +31,10 @@ test('it installs larastan', function (): void {
         ['interactive' => true]);
 
     // Assert
-    expect(file_exists($this->outputDirectory('temp'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phpstan')))
+
+    $fs = new Filesystem();
+
+    expect($fs->isDirectory($this->outputDirectory('temp/vendor/larastan')))
         ->toBeTrue();
 
 });
