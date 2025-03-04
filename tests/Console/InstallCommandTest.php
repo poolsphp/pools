@@ -30,7 +30,12 @@ test('it installs larastan', function (): void {
         ['interactive' => true]);
 
     // Assert
-    expect(file_exists($this->outputDirectory('temp/vendor/larastan')))
+
+    if (PHP_OS_FAMILY === 'Windows') {
+        sleep(1);
+    }
+
+    expect(file_exists($this->outputDirectory('temp'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'larastan')))
         ->toBeTrue();
 
 });

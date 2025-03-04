@@ -8,6 +8,7 @@ use Exception;
 use FilesystemIterator;
 use Illuminate\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase as BaseTestCase;
+use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -67,12 +68,12 @@ abstract class TestCase extends BaseTestCase
 
     protected function makeFilesWritable(string $dir): void
     {
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             return;
         }
 
         $items = new RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
             RecursiveIteratorIterator::CHILD_FIRST
         );
 
@@ -99,23 +100,35 @@ abstract class TestCase extends BaseTestCase
         return $this->normalizePath($base.'/'.$path);
     }
 
+    protected function normalizePath(string $path): string
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $path = str_replace('/', '\\', $path);
+
+            return str_replace('\\\\', '\\', $path);
+        }
+        $path = str_replace('\\', '/', $path);
+
+        return str_replace('//', '/', $path);
+    }
+
     private function configureFileSystem(): void
     {
         $this->originalWorkingDirectory = getcwd();
         $fs = new Filesystem();
 
         $outputDir = $this->outputDirectory();
-        if (!$fs->isDirectory($outputDir)) {
+        if (! $fs->isDirectory($outputDir)) {
             $fs->makeDirectory($outputDir, 0777, true);
         }
 
         $tempDir = $this->outputDirectory('temp');
-        if (!$fs->isDirectory($tempDir)) {
+        if (! $fs->isDirectory($tempDir)) {
             $fs->makeDirectory($tempDir, 0777, true);
         }
 
         $composerJsonPath = $tempDir.DIRECTORY_SEPARATOR.'composer.json';
-        if (!$fs->exists($composerJsonPath)) {
+        if (! $fs->exists($composerJsonPath)) {
             $fs->copy(
                 $this->fixturePath('composer.json'),
                 $composerJsonPath
@@ -123,18 +136,5 @@ abstract class TestCase extends BaseTestCase
         }
 
         chdir($tempDir);
-    }
-
-    protected function normalizePath(string $path): string
-    {
-        if (PHP_OS_FAMILY === 'Windows') {
-            $path = str_replace('/', '\\', $path);
-            $path = str_replace('\\\\', '\\', $path);
-        } else {
-            $path = str_replace('\\', '/', $path);
-            $path = str_replace('//', '/', $path);
-        }
-
-        return $path;
     }
 }
