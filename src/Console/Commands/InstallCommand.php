@@ -303,7 +303,7 @@ final class InstallCommand extends Command
     /** @codeCoverageIgnore  */
     private function confirmLarastanInstall(InputInterface $input): void
     {
-        if ($this->isLaravelApp) {
+        if ($this->isLaravelApp && ! $input->getOption('larastan')) {
             $input->setOption('larastan', confirm(
                 label: 'Your project has Laravel installed. Would you like to install Larastan instead PHPStan?',
                 hint: 'Larastan is a wrapper around PHPStan that provides a better experience for Laravel applications.'
