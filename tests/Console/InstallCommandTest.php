@@ -34,7 +34,7 @@ test('it installs larastan', function (): void {
 
     $fs = new Filesystem();
 
-    expect($fs->isDirectory($this->outputDirectory('temp/vendor/larastan')))
+    expect($fs->isDirectory($this->outputDirectory('temp\vendor\larastan')))
         ->toBeTrue();
 
 });
