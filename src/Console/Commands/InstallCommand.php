@@ -16,6 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
+use function array_key_exists;
 use function dirname;
 use function file_exists;
 use function file_get_contents;
@@ -23,6 +24,7 @@ use function function_exists;
 use function getcwd;
 use function Illuminate\Support\php_binary;
 use function implode;
+use function json_decode;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\multiselect;
 use function Laravel\Prompts\text;
@@ -173,7 +175,7 @@ final class InstallCommand extends Command
     private function init(string $directory): void
     {
         $this->composer = new Composer(new Filesystem(), $directory);
-        $this->isLaravelApp = $this->isLaravelApp();
+        $this->isLaravelApp = $this->isLaravelApp($directory);
     }
 
     private function findComposer(): string
@@ -377,9 +379,20 @@ final class InstallCommand extends Command
         );
     }
 
-    private function isLaravelApp(): bool
+    private function isLaravelApp(string $directory): bool
     {
-        return $this->composer->hasPackage('laravel/framework');
+
+        $composerFile = $directory.'/composer.json';
+
+        if (! file_exists($composerFile)) {
+            return false;
+        }
+
+        $composer = json_decode(file_get_contents($composerFile), true);
+
+        return array_key_exists('laravel/framework', $composer['require'] ?? [])
+            || array_key_exists('laravel/framework', $composer['require-dev'] ?? []);
+
     }
 
     private function runCommands(array $commands, OutputInterface $output, ?string $workingDirectory = null, array $env = []): Process

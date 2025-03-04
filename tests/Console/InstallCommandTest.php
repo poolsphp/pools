@@ -6,6 +6,29 @@ use Pools\Console\Commands\InstallCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
+test('is not a laravel application', function (): void {
+
+    // Arrange
+    $app = new Application('Pools', '0.0.1');
+    $app->add(new InstallCommand());
+
+    $tester = new CommandTester($app->find('install'));
+
+    unlink($this->outputDirectory('temp/composer.json'));
+
+    // Act
+    $statusCode = $tester->execute([
+        '--all' => true,
+        '--type-check-level' => '5',
+        '--overwrite-all' => true,
+    ],
+        ['interactive' => true]);
+
+    // Assert
+    expect($statusCode)->toBe(0);
+
+});
+
 test('it installs larastan', function (): void {
 
     // Arrange
