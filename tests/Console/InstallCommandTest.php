@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Pools\Console\Commands\InstallCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
-use Illuminate\Filesystem\Filesystem;
 
 test('it installs larastan', function (): void {
 
@@ -32,14 +31,13 @@ test('it installs larastan', function (): void {
 
     // Assert
 
-    if(PHP_OS_FAMILY === 'Windows') {
+    if (PHP_OS_FAMILY === 'Windows') {
         expect(file_exists($this->outputDirectory('temp/vendor/bin/phpstan.bat')))
             ->toBeTrue();
     } else {
         expect(file_exists($this->outputDirectory('temp/vendor/bin/phpstan')))
             ->toBeTrue();
     }
-
 
 });
 
