@@ -6,18 +6,22 @@ namespace Pools\Console\Commands;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Composer;
+use Illuminate\Support\ProcessUtils;
 use Pools\Concerns\Console\InteractsWithPrompts;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
 use function dirname;
 use function file_exists;
 use function file_get_contents;
+use function function_exists;
 use function getcwd;
+use function Illuminate\Support\php_binary;
 use function implode;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\multiselect;
@@ -128,6 +132,13 @@ final class InstallCommand extends Command
             );
         }
 
+        if(!$input->getOption('overwrite-all') && $input->getOption('pest') && $this->pestIsInstalled($directory)) {
+            $input->setOption(
+                'overwrite-pest',
+                confirm('Would you like to overwrite the existing Pest configuration?')
+            );
+        }
+
 
         $this->init($directory);
     }
@@ -153,6 +164,10 @@ final class InstallCommand extends Command
             $this->installRector($directory, $input, $output);
         }
 
+        if($input->getOption('pest')) {
+            $this->installPest($directory, $input, $output);
+        }
+
         return Command::SUCCESS;
     }
 
@@ -173,8 +188,21 @@ final class InstallCommand extends Command
 
         $commands = [
             $composerBinary.' remove phpunit/phpunit --dev --no-update',
-            $composerBinary.' require --dev pestphp/pest --with-all-dependencies --no-update',
+            $composerBinary.' require pestphp/pest pestphp/pest-plugin-faker pestphp/pest-plugin-watch  --with-all-dependencies --dev --no-update',
+            $composerBinary. ' update',
         ];
+
+        if($input->getOption('overwrite-pest') && $this->pestIsInstalled($directory)) {
+            $fs = new Filesystem();
+            $fs->delete($directory.'/phpunit.xml');
+            $fs->delete($directory.'/tests/Pest.php');
+            $fs->delete($directory.'/tests/TestCase.php');
+            $fs->delete($directory.'/tests/Unit/ExampleTest.php');
+            $fs->delete($directory.'/tests/Feature/ExampleTest.php');
+            $commands[] =  $this->phpBinary().' ./vendor/bin/pest --init';
+        } elseif(!$this->pestIsInstalled($directory)) {
+            $commands[] =  $this->phpBinary().' ./vendor/bin/pest --init';
+        }
 
         $this->runCommands($commands, $output, $directory);
 
@@ -212,6 +240,24 @@ final class InstallCommand extends Command
         } elseif (! $this->rectorConfigExists($directory)) {
             $this->copyRectorStubs($directory);
         }
+    }
+
+    protected function phpBinary(): string
+    {
+        $phpBinary = function_exists('Illuminate\Support\php_binary')
+            ? php_binary()
+            : (new PhpExecutableFinder())->find(false);
+
+        return $phpBinary !== false
+            ? ProcessUtils::escapeArgument($phpBinary)
+            : 'php';
+    }
+
+    private function pestIsInstalled(string $directory): bool
+    {
+        return file_exists($directory.'/vendor/bin/pest')
+            && file_exists($directory.'/phpunit.xml')
+            && file_exists($directory.'/tests/Pest.php');
     }
 
     private function rectorConfigExists(string $directory): bool
