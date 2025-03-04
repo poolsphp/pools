@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows: ["Tests", "Formats"]
+    types:
+      - completed
+    branches:
+      - main  # Change this to match your main branch name if different
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # This is important for commit history
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Conventional Changelog
+        run: |
+          npm install -g conventional-changelog-cli
+          npm install -g standard-version
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: dom, mbstring, zip
+          coverage: none
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Determine Version Based on Conventional Commits
+        id: version
+        run: |
+          # Get the latest tag, if any
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+
+          # Extract version number without the 'v' prefix
+          LATEST_VERSION=${LATEST_TAG#v}
+
+          # Split into components
+          IFS='.' read -r -a VERSION_PARTS <<< "$LATEST_VERSION"
+          MAJOR="${VERSION_PARTS[0]}"
+          MINOR="${VERSION_PARTS[1]}"
+          PATCH="${VERSION_PARTS[2]}"
+
+          # Analyze commits since last tag
+          if [[ "$LATEST_TAG" == "v0.0.0" ]]; then
+            # First release
+            NEW_VERSION="0.0.1"
+          else
+            # Get all commit subjects since last tag
+            COMMITS=$(git log $LATEST_TAG..HEAD --pretty=format:"%s")
+
+            # Check for breaking changes or feat! (BREAKING CHANGE)
+            if echo "$COMMITS" | grep -q -E "BREAKING CHANGE|feat!:"; then
+              # Major version bump for breaking changes
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+            # Check for new features
+            elif echo "$COMMITS" | grep -q "^feat:"; then
+              # Minor version bump for features
+              MINOR=$((MINOR + 1))
+              PATCH=0
+            else
+              # Patch version bump for fixes, etc.
+              PATCH=$((PATCH + 1))
+            fi
+
+            NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          fi
+
+          echo "Current version: $LATEST_VERSION"
+          echo "New version: $NEW_VERSION"
+
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate Changelog
+        run: |
+          # Generate changelog based on conventional commits
+          conventional-changelog -p angular -i CHANGELOG.md -s -r 0
+
+          # Create a temp file for the current release notes only
+          conventional-changelog -p angular -r 2 > RELEASE_NOTES.md
+
+      - name: Create Tag
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+          # Add the changelog file
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG.md for v$VERSION [skip ci]"
+
+          # Create new version tag
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git push origin main
+          git push origin "v$VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          body_path: RELEASE_NOTES.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
