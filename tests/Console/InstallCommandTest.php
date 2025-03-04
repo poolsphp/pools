@@ -32,10 +32,14 @@ test('it installs larastan', function (): void {
 
     // Assert
 
-    $fs = new Filesystem();
+    if(PHP_OS_FAMILY === 'Windows') {
+        expect(file_exists($this->outputDirectory('temp/vendor/bin/phpstan.bat')))
+            ->toBeTrue();
+    } else {
+        expect(file_exists($this->outputDirectory('temp/vendor/bin/phpstan')))
+            ->toBeTrue();
+    }
 
-    expect($fs->isDirectory($this->outputDirectory('temp/vendor/larastan')))
-        ->toBeTrue();
 
 });
 
