@@ -30,25 +30,7 @@ test('it installs larastan', function (): void {
         ['interactive' => true]);
 
     // Assert
-
-    if (PHP_OS_FAMILY === 'Windows') {
-        sleep(1);
-
-        // Debug info
-        echo "Current directory: " . getcwd() . PHP_EOL;
-        echo "Checking for directory: " . $this->outputDirectory('temp'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'larastan') . PHP_EOL;
-
-        if (is_dir($this->outputDirectory('temp'.DIRECTORY_SEPARATOR.'vendor'))) {
-            echo "Vendor directory exists, contents:" . PHP_EOL;
-            print_r(scandir($this->outputDirectory('temp'.DIRECTORY_SEPARATOR.'vendor')));
-        } else {
-            echo "Vendor directory does not exist!" . PHP_EOL;
-        }
-
-
-    }
-
-    expect(file_exists($this->outputDirectory('temp'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'larastan')))
+    expect(file_exists($this->outputDirectory('temp'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phpstan')))
         ->toBeTrue();
 
 });
