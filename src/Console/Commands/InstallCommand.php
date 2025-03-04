@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pools\Console\Commands;
 
+
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Composer;
 use Pools\Concerns\Console\InteractsWithPrompts;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -11,12 +14,17 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Symfony\Component\Process\Process;
+use function getcwd;
+use function implode;
 use function Laravel\Prompts\multiselect;
 
 #[AsCommand(name: 'install')]
 final class InstallCommand extends Command
 {
     use InteractsWithPrompts;
+
+    private Composer $composer;
 
     protected function configure(): void
     {
@@ -65,8 +73,47 @@ final class InstallCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
 
+        $directory = getcwd();
+
+        $this->composer = new Composer(new Filesystem(), $directory);
+
+        if($input->getOption('phpstan')) {
+            $this->installPhpStan($directory, $input, $output);
+        }
+
         return Command::SUCCESS;
     }
+
+    private function installPhpStan(string $directory, InputInterface $input, OutputInterface $output): void
+    {
+        $composerBinary = $this->findComposer();
+
+        $commands = [
+            $composerBinary.' require --dev phpstan/phpstan',
+            $composerBinary.' require --dev phpstan/phpstan-phpunit',
+            $composerBinary.' require --dev phpstan/phpstan-deprecation-rules'
+        ];
+
+        $process = Process::fromShellCommandline(
+            command: implode(' &&', $commands),
+            cwd: $directory,
+            env: [],
+            timeout: null
+        );
+
+        $process->run(function ($type, $buffer) use ($output) {
+            $output->write('    '.$buffer);
+        });
+    }
+
+    protected function findComposer(): string
+    {
+        return implode(' ', $this->composer->findComposer());
+    }
+
+
+
+
 
     /** @codeCoverageIgnore  */
     private function displayPoolsLogo(OutputInterface $output): void
