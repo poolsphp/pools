@@ -22,7 +22,6 @@ use function file_exists;
 use function file_get_contents;
 use function function_exists;
 use function getcwd;
-use function Illuminate\Support\php_binary;
 use function implode;
 use function json_decode;
 use function Laravel\Prompts\confirm;
@@ -247,7 +246,7 @@ final class InstallCommand extends Command
     private function phpBinary(): string
     {
         $phpBinary = function_exists('Illuminate\Support\php_binary')
-            ? php_binary()
+            ? \Illuminate\Support\php_binary()
             : (new PhpExecutableFinder())->find(false);
 
         return $phpBinary !== false
