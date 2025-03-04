@@ -47,6 +47,21 @@
             "pestphp/pest-plugin": true
         }
     },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "0.x-dev"
+        }
+    },
+    "archive": {
+        "exclude": [
+            "/.vscode",
+            "/.github",
+            "/test-output",
+            "/.gitattributes",
+            "/.gitignore",
+            "/phpunit.xml"
+        ]
+    },
     "scripts": {
         "refacto": "rector",
         "lint": "pint",

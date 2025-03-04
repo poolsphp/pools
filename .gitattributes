@@ -9,7 +9,8 @@
 .gitignore         export-ignore
 phpstan.neon.dist  export-ignore
 phpunit.xml.dist   export-ignore
-rector.php         export-ignore
+/rector.php        export-ignore
 CHANGELOG.md       export-ignore
 CONTRIBUTING.md    export-ignore
 README.md          export-ignore
+/stubs             export-keep
