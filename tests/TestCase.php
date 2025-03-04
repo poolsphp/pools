@@ -4,100 +4,62 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Illuminate\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase as BaseTestCase;
-use Pools\ComposerManager;
-use Pools\Exceptions\NoComposerException;
-use Pools\PHPPackageInstaller;
-use Pools\ValueObjects\PackagePayload;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Filesystem\Filesystem;
-
-use function unlink;
 
 abstract class TestCase extends BaseTestCase
 {
-    protected ComposerManager $reader;
-
     protected string $fixturesPath = __DIR__.'/fixtures';
 
     protected ArrayInput $input;
 
     protected BufferedOutput $output;
 
-    protected ComposerManager $composerManager;
-
-    protected PHPPackageInstaller $phpPackageInstaller;
-
-    protected PackagePayload $packagePayload;
-
     protected string $originalWorkingDirectory;
 
-    /**
-     * @throws NoComposerException
-     */
     protected function setUp(): void
     {
         parent::setUp();
         $this->configureFileSystem();
-        $this->configureDependencies();
     }
 
     protected function tearDown(): void
     {
+        $fs = new Filesystem();
+        $fs->deleteDirectory(
+            $this->outputDirectory('temp')
+        );
 
-        if (file_exists($this->getTempFileSystemPath('composer.json'))) {
-
-            unlink($this->getTempFileSystemPath('composer.json'));
-        }
-
-        if (file_exists($this->getTempFileSystemPath('composer.lock'))) {
-            unlink($this->getTempFileSystemPath('composer.lock'));
-        }
         // We should remove the vendor directory
         parent::tearDown();
     }
 
-    protected function getFixturePath(string $path): string
+    protected function fixturePath(string $path): string
     {
         return $this->fixturesPath.'/'.$path;
     }
 
-    protected function getTempFileSystemPath(?string $path = null): string
+    protected function outputDirectory(?string $path = null): string
     {
-        return $this->originalWorkingDirectory.'/.temp/filesystem/'.$path;
+        return $this->originalWorkingDirectory.'/test-output/'.$path;
     }
 
     private function configureFileSystem(): void
     {
         $this->originalWorkingDirectory = getcwd();
         $fs = new Filesystem();
-        if (! $fs->exists($this->getTempFileSystemPath('composer.json'))) {
+        if (! $fs->exists($this->outputDirectory('temp/composer.json'))) {
+            if (! $fs->isDirectory($this->outputDirectory('temp'))) {
+                $fs->makeDirectory($this->outputDirectory('temp'));
+            }
             $fs->copy(
-                $this->getFixturePath('composer.json'),
-                $this->getTempFileSystemPath('composer.json')
+                $this->fixturePath('composer.json'),
+                $this->outputDirectory('temp/composer.json')
             );
         }
 
-        chdir($this->getTempFileSystemPath());
-    }
-
-    /**
-     * @throws NoComposerException
-     */
-    private function configureDependencies(): void
-    {
-        $this->input = new ArrayInput([]);
-        $this->output = new BufferedOutput();
-        $this->composerManager = new ComposerManager(
-            $this->getTempFileSystemPath('composer.json')
-        );
-        $this->phpPackageInstaller = new PHPPackageInstaller($this->composerManager);
-        $this->packagePayload = new PackagePayload(
-            $this->phpPackageInstaller,
-            $this->composerManager,
-            $this->input,
-            $this->output
-        );
+        chdir($this->outputDirectory('temp'));
     }
 }

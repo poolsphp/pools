@@ -44,6 +44,7 @@ final class InstallCommand extends Command
             ->addOption('all', null, InputOption::VALUE_NONE, 'Installs all packages')
             ->addOption('overwrite-all', null, InputOption::VALUE_NONE, 'Overwrites all existing configurations')
             ->addOption('phpstan', null, InputOption::VALUE_NONE, 'Installs PHPStan')
+            ->addOption('larastan', null, InputOption::VALUE_NONE, 'Installs Larastan')
             ->addOption('type-check-level', null, InputOption::VALUE_NONE, 'Sets the PHPStan level')
             ->addOption('overwrite-phpstan', null, InputOption::VALUE_NONE, 'Overwrites the existing PHPStan|Larastan configuration')
             ->addOption('pest', null, InputOption::VALUE_NONE, 'Installs Pest')
@@ -240,6 +241,7 @@ final class InstallCommand extends Command
         }
     }
 
+    /** @codeCoverageIgnore  */
     private function phpBinary(): string
     {
         $phpBinary = function_exists('Illuminate\Support\php_binary')
@@ -275,15 +277,9 @@ final class InstallCommand extends Command
     {
         $composerBinary = $this->findComposer();
 
-        $installLarastan = false;
-        if ($this->isLaravelApp) {
-            $installLarastan = confirm(
-                label: 'Your project has Laravel installed. Would you like to install Larastan instead PHPStan?',
-                hint: 'Larastan is a wrapper around PHPStan that provides a better experience for Laravel applications.'
-            );
-        }
+        $this->confirmLarastanInstall($input);
 
-        $commands = match ($installLarastan) {
+        $commands = match ($input->getOption('larastan')) {
             true => [
                 $composerBinary.' require --dev larastan/larastan',
             ],
@@ -297,11 +293,22 @@ final class InstallCommand extends Command
         $this->runCommands($commands, $output, $directory);
 
         if ($this->typeCheckConfigExists($directory) && $input->getOption('overwrite-phpstan')) {
-            $this->copyTypeCheckStubs($directory, $input->getOption('type-check-level'), $installLarastan);
+            $this->copyTypeCheckStubs($directory, $input->getOption('type-check-level'), $input->getOption('larastan'));
         } elseif (! $this->typeCheckConfigExists($directory)) {
-            $this->copyTypeCheckStubs($directory, $input->getOption('type-check-level'), $installLarastan);
+            $this->copyTypeCheckStubs($directory, $input->getOption('type-check-level'), $input->getOption('larastan'));
         }
 
+    }
+
+    /** @codeCoverageIgnore  */
+    private function confirmLarastanInstall(InputInterface $input): void
+    {
+        if ($this->isLaravelApp) {
+            $input->setOption('larastan', confirm(
+                label: 'Your project has Laravel installed. Would you like to install Larastan instead PHPStan?',
+                hint: 'Larastan is a wrapper around PHPStan that provides a better experience for Laravel applications.'
+            ));
+        }
     }
 
     private function typeCheckConfigExists(string $directory): bool

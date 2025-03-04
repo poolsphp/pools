@@ -6,7 +6,99 @@ use Pools\Console\Commands\InstallCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
-test('it sets all packages to true', function (): void {
+test('it installs larastan', function (): void {
+
+    // Arrange
+    $app = new Application('Pools', '0.0.1');
+    $app->add(new InstallCommand());
+
+    $tester = new CommandTester($app->find('install'));
+
+    file_put_contents(
+        $this->outputDirectory('temp/composer.json'),
+        file_get_contents($this->fixturePath('composer-with-laravel.json'))
+    );
+
+    // Act
+    $tester->execute([
+        '--all' => false,
+        '--phpstan' => true,
+        '--type-check-level' => '5',
+        '--overwrite-all' => true,
+        '--larastan' => true,
+    ],
+        ['interactive' => true]);
+
+    // Assert
+    expect(file_exists($this->outputDirectory('temp/vendor/larastan')))
+        ->toBeTrue();
+
+});
+
+test('it overwrites installation', function (): void {
+    // Arrange
+    $app = new Application('Pools', '0.0.1');
+    $app->add(new InstallCommand());
+
+    $tester = new CommandTester($app->find('install'));
+
+    $tester->execute([
+        '--all' => true,
+        '--type-check-level' => '5',
+        '--overwrite-all' => true,
+    ],
+        ['interactive' => true]);
+
+    // Act
+    $tester->execute([
+        '--pest' => true,
+        '--pint' => true,
+        '--rector' => true,
+        '--overwrite-all' => 'false',
+        '--overwrite-pest' => true,
+    ],
+        ['interactive' => true]);
+
+    // Assert
+    expect(file_exists($this->outputDirectory('temp/phpunit.xml')))
+        ->toBeTrue()
+        ->and(file_exists($this->outputDirectory('temp/pint.json')))
+        ->toBeTrue()
+        ->and(file_exists($this->outputDirectory('temp/rector.php')))
+        ->toBeTrue();
+
+});
+
+test('install phpstan and overwrites config file', function (): void {
+
+    // Arrange
+    $app = new Application('Pools', '0.0.1');
+    $app->add(new InstallCommand());
+
+    $tester = new CommandTester($app->find('install'));
+
+    file_put_contents(
+        $this->outputDirectory('temp/phpstan.neon'),
+        'foo'
+    );
+
+    // Act
+    $tester->execute([
+        '--phpstan' => true,
+        '--overwrite-all' => 'false',
+        '--type-check-level' => '5',
+        '--overwrite-phpstan' => true,
+    ],
+        ['interactive' => true]);
+
+    expect(file_exists($this->outputDirectory('temp/phpstan.neon')))
+        ->toBeTrue()
+        ->and(file_get_contents(__DIR__.'/../../stubs/phpstan/phpstan.neon'))
+        ->toBe(file_get_contents($this->outputDirectory('temp/phpstan.neon')));
+
+});
+
+test('install all packages', function (): void {
 
     $app = new Application('Pools', '0.0.1');
     $app->add(new InstallCommand());
@@ -16,7 +108,7 @@ test('it sets all packages to true', function (): void {
     $statusCode = $tester->execute([
         '--all' => true,
         '--type-check-level' => '5',
-        '--overwrite-phpstan-config' => true,
+        '--overwrite-all' => true,
     ],
         ['interactive' => true]);
 
@@ -28,6 +120,14 @@ test('it sets all packages to true', function (): void {
     expect($statusCode)
         ->toBe(0)
         ->and($all && $phpstan && $pest && $pint && $rector)
+        ->toBeTrue()
+        ->and(file_exists($this->outputDirectory('temp/rector.php')))
+        ->toBeTrue()
+        ->and(file_exists($this->outputDirectory('temp/pint.json')))
+        ->toBeTrue()
+        ->and(file_exists($this->outputDirectory('temp/phpstan.neon')))
+        ->toBeTrue()
+        ->and(file_exists($this->outputDirectory('temp/phpunit.xml')))
         ->toBeTrue();
 
 });
