@@ -13,7 +13,6 @@ use Symfony\Component\Console\Application;
 
 $application = new Application('Pools', '0.0.1');
 
-$application->add(new DefaultCommand());
 $application->add(new InstallCommand());
 
 $application->run();
