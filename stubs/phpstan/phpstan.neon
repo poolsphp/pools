@@ -1,0 +1,8 @@
+parameters:
+    paths:
+        - src/
+    level: 5
+
+    excludePaths:
+        - tests/*      # Excludes all files in tests directory
+        - tests/**/*   # Excludes all files in subdirectories of tests

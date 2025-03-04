@@ -13,7 +13,12 @@ test('it sets all packages to true', function (): void {
 
     $tester = new CommandTester($app->find('install'));
 
-    $statusCode = $tester->execute(['--all' => true], ['interactive' => true]);
+    $statusCode = $tester->execute([
+        '--all' => true,
+        '--type-check-level' => '5',
+        '--overwrite-phpstan-config' => true,
+    ],
+        ['interactive' => true]);
 
     [$all, $phpstan, $pest, $pint, $rector] = array_values(
         collect($tester->getInput()->getOptions())
