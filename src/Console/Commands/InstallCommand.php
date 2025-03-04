@@ -38,12 +38,16 @@ final class InstallCommand extends Command
         $this->setNAme('install')
             ->setDescription('Installs and configures Modern PHP tools for your project')
             ->addOption('all', null, InputOption::VALUE_NONE, 'Installs all packages')
+            ->addOption('overwrite-all', null,InputOption::VALUE_NONE, 'Overwrites all existing configurations')
             ->addOption('phpstan', null, InputOption::VALUE_NONE, 'Installs PHPStan')
             ->addOption('type-check-level', null, InputOption::VALUE_NONE, 'Sets the PHPStan level')
-            ->addOption('overwrite-phpstan-config', null, InputOption::VALUE_NONE, 'Overwrites the existing PHPStan|Larastan configuration?')
+            ->addOption('overwrite-phpstan', null, InputOption::VALUE_NONE, 'Overwrites the existing PHPStan|Larastan configuration')
             ->addOption('pest', null, InputOption::VALUE_NONE, 'Installs Pest')
+            ->addOption('overwrite-pest', null,InputOption::VALUE_NONE, 'Overwrites existing Pest configuration')
             ->addOption('pint', null, InputOption::VALUE_NONE, 'Installs Pint')
-            ->addOption('rector', null, InputOption::VALUE_NONE, 'Installs Rector');
+            ->addOption('overwrite-pint', null, InputOption::VALUE_NONE, 'Overwrites existing pint configuration')
+            ->addOption('rector', null, InputOption::VALUE_NONE, 'Installs Rector')
+            ->addOption('overwrite-rector', null, InputOption::VALUE_NONE, 'Overwrites existing Rector configuration');
 
     }
 
@@ -85,9 +89,45 @@ final class InstallCommand extends Command
             $input->setOption('type-check-level', text('What level would you like to set PHPStan to (0-10)?', '5', '5'));
         }
 
-        if ($input->getOption('phpstan') && $this->typeCheckConfigExists($directory) && ! $input->getOption('overwrite-phpstan-config')) {
-            $input->setOption('overwrite-phpstan-config', confirm('Would you like to overwrite the existing PHPStan|Larastan configuration?'));
+        if ($input->getOption('overwrite-all')) {
+            $input->setOption('overwrite-phpstan', true);
+            $input->setOption('overwrite-pint', true);
+            $input->setOption('overwrite-rector', true);
+            $input->setOption('overwrite-pest', true);
         }
+
+        if(!$input->getOption('overwrite-all') && ($this->rectorConfigExists($directory) || $this->pintConfigExists($directory) || $this->typeCheckConfigExists($directory)) ) {
+            $input->setOption(
+                'overwrite-all',
+                confirm(
+                    label: 'Would you like to overwrite all existing configuration?',
+                    hint:  'Caution: This options will overwrite all existing configuration files.'
+                )
+            );
+        }
+
+
+        if (!$input->getOption('overwrite-all') && $input->getOption('phpstan') && $this->typeCheckConfigExists($directory) && ! $input->getOption('overwrite-phpstan')) {
+            $input->setOption(
+                'overwrite-phpstan',
+                confirm('Would you like to overwrite the existing PHPStan|Larastan configuration?')
+            );
+        }
+
+        if(!$input->getOption('overwrite-all') && $input->getOption('pint') && $this->pintConfigExists($directory)) {
+            $input->setOption(
+                'overwrite-pint',
+                confirm('Would you like to overwrite the existing Pint configuration?')
+            );
+        }
+
+        if(!$input->getOption('overwrite-all') && $input->getOption('rector') && $this->rectorConfigExists($directory)) {
+            $input->setOption(
+                'overwrite-rector',
+                confirm('Would you like to overwrite the existing Rector configuration?')
+            );
+        }
+
 
         $this->init($directory);
     }
@@ -105,6 +145,14 @@ final class InstallCommand extends Command
             $this->installPhpStan($directory, $input, $output);
         }
 
+        if($input->getOption('pint')) {
+            $this->installPint($directory, $input, $output);
+        }
+
+        if($input->getOption('rector')) {
+            $this->installRector($directory, $input, $output);
+        }
+
         return Command::SUCCESS;
     }
 
@@ -117,6 +165,66 @@ final class InstallCommand extends Command
     private function findComposer(): string
     {
         return implode(' ', $this->composer->findComposer());
+    }
+
+    private function installPest(string $directory, InputInterface $input, OutputInterface $output): void
+    {
+        $composerBinary = $this->findComposer();
+
+        $commands = [
+            $composerBinary.' remove phpunit/phpunit --dev --no-update',
+            $composerBinary.' require --dev pestphp/pest --with-all-dependencies --no-update',
+        ];
+
+        $this->runCommands($commands, $output, $directory);
+
+    }
+
+    private function installPint(string $directory, InputInterface $input, OutputInterface $output): void
+    {
+        $composerBinary = $this->findComposer();
+
+        $commands = [
+            $composerBinary.' require --dev laravel/pint',
+        ];
+
+        $this->runCommands($commands, $output, $directory);
+
+        if ($this->pintConfigExists($directory) && $input->getOption('overwrite-pint')) {
+            $this->copyPintStubs($directory);
+        } elseif (! $this->pintConfigExists($directory)) {
+            $this->copyPintStubs($directory);
+        }
+    }
+
+    private function installRector(string $directory, InputInterface $input, OutputInterface $output): void
+    {
+        $composerBinary = $this->findComposer();
+
+        $commands = [
+            $composerBinary.' require rector/rector --no-update --dev',
+        ];
+
+        $this->runCommands($commands, $output, $directory);
+
+        if ($this->rectorConfigExists($directory) && $input->getOption('overwrite-rector')) {
+            $this->copyRectorStubs($directory);
+        } elseif (! $this->rectorConfigExists($directory)) {
+            $this->copyRectorStubs($directory);
+        }
+    }
+
+    private function rectorConfigExists(string $directory): bool
+    {
+        return file_exists($directory.'/rector.php');
+    }
+
+    private function copyRectorStubs(string $directory): void
+    {
+        $this->replaceFile(
+            'rector/rector.php',
+            $directory.'/rector.php'
+        );
     }
 
     private function installPhpStan(string $directory, InputInterface $input, OutputInterface $output): void
@@ -133,7 +241,7 @@ final class InstallCommand extends Command
 
         $commands = match ($installLarastan) {
             true => [
-                $composerBinary.' require --dev nunomaduro/larastan',
+                $composerBinary.' require --dev larastan/larastan',
             ],
             default => [
                 $composerBinary.' require --dev phpstan/phpstan',
@@ -144,7 +252,7 @@ final class InstallCommand extends Command
 
         $this->runCommands($commands, $output, $directory);
 
-        if ($this->typeCheckConfigExists($directory) && $input->getOption('overwrite-phpstan-config')) {
+        if ($this->typeCheckConfigExists($directory) && $input->getOption('overwrite-phpstan')) {
             $this->copyTypeCheckStubs($directory, $input->getOption('type-check-level'), $installLarastan);
         } elseif (! $this->typeCheckConfigExists($directory)) {
             $this->copyTypeCheckStubs($directory, $input->getOption('type-check-level'), $installLarastan);
@@ -155,6 +263,30 @@ final class InstallCommand extends Command
     private function typeCheckConfigExists(string $directory): bool
     {
         return file_exists($directory.'/phpstan.neon') || file_exists($directory.'/phpstan.neon.dist');
+    }
+
+    private function pintConfigExists(string $directory): bool
+    {
+        return file_exists($directory.'/pint.json');
+    }
+
+
+    private function  copyPintStubs(string $directory): void
+    {
+        $this->replaceFile(
+            'pint/pint.json',
+            $directory.'/pint.json'
+        );
+
+        if(!$this->isLaravelApp) {
+            $this->replaceInFile(
+                '"preset": "laravel"',
+                "",
+                $directory.'/pint.json'
+            );
+        }
+
+
     }
 
     private function copyTypeCheckStubs(string $directory, string $typeCheckLevel = '5', bool $configureLarastan = false): void
