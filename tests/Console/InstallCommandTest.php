@@ -20,7 +20,6 @@ test('is not a laravel application', function (): void {
     $statusCode = $tester->execute([
         '--all' => true,
         '--type-check-level' => '5',
-        '--overwrite-all' => true,
     ],
         ['interactive' => true]);
 
@@ -47,7 +46,6 @@ test('it installs larastan', function (): void {
         '--all' => false,
         '--phpstan' => true,
         '--type-check-level' => '5',
-        '--overwrite-all' => true,
         '--larastan' => true,
     ],
         ['interactive' => true]);
@@ -75,17 +73,19 @@ test('it overwrites installation', function (): void {
     $tester->execute([
         '--all' => true,
         '--type-check-level' => '5',
-        '--overwrite-all' => true,
     ],
         ['interactive' => true]);
 
     // Act
+
+    $tester = new CommandTester($app->find('install'));
     $tester->execute([
         '--pest' => true,
         '--pint' => true,
         '--rector' => true,
-        '--overwrite-all' => 'false',
         '--overwrite-pest' => true,
+        '--overwrite-pint' => true,
+        '--overwrite-rector' => true,
     ],
         ['interactive' => true]);
 
@@ -115,7 +115,6 @@ test('install phpstan and overwrites config file', function (): void {
     // Act
     $tester->execute([
         '--phpstan' => true,
-        '--overwrite-all' => 'false',
         '--type-check-level' => '5',
         '--overwrite-phpstan' => true,
     ],
@@ -138,7 +137,6 @@ test('install all packages', function (): void {
     $statusCode = $tester->execute([
         '--all' => true,
         '--type-check-level' => '5',
-        '--overwrite-all' => true,
     ],
         ['interactive' => true]);
 

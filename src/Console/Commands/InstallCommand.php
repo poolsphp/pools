@@ -43,7 +43,6 @@ final class InstallCommand extends Command
         $this->setNAme('install')
             ->setDescription('Installs and configures Modern PHP tools for your project')
             ->addOption('all', null, InputOption::VALUE_NONE, 'Installs all packages')
-            ->addOption('overwrite-all', null, InputOption::VALUE_NONE, 'Overwrites all existing configurations')
             ->addOption('phpstan', null, InputOption::VALUE_NONE, 'Installs PHPStan')
             ->addOption('larastan', null, InputOption::VALUE_NONE, 'Installs Larastan')
             ->addOption('type-check-level', null, InputOption::VALUE_NONE, 'Sets the PHPStan level')
@@ -95,45 +94,28 @@ final class InstallCommand extends Command
             $input->setOption('type-check-level', text('What level would you like to set PHPStan to (0-10)?', '5', '5'));
         }
 
-        if ($input->getOption('overwrite-all')) {
-            $input->setOption('overwrite-phpstan', true);
-            $input->setOption('overwrite-pint', true);
-            $input->setOption('overwrite-rector', true);
-            $input->setOption('overwrite-pest', true);
-        }
-
-        if (! $input->getOption('overwrite-all') && ($this->rectorConfigExists($directory) || $this->pintConfigExists($directory) || $this->typeCheckConfigExists($directory))) {
-            $input->setOption(
-                'overwrite-all',
-                confirm(
-                    label: 'Would you like to overwrite all existing configuration?',
-                    hint: 'Caution: This options will overwrite all existing configuration files.'
-                )
-            );
-        }
-
-        if (! $input->getOption('overwrite-all') && $input->getOption('phpstan') && $this->typeCheckConfigExists($directory) && ! $input->getOption('overwrite-phpstan')) {
+        if ($input->getOption('phpstan') && $this->typeCheckConfigExists($directory) && ! $input->getOption('overwrite-phpstan')) {
             $input->setOption(
                 'overwrite-phpstan',
                 confirm('Would you like to overwrite the existing PHPStan|Larastan configuration?')
             );
         }
 
-        if (! $input->getOption('overwrite-all') && $input->getOption('pint') && $this->pintConfigExists($directory)) {
+        if ($input->getOption('pint') && $this->pintConfigExists($directory) && ! $input->getOption('overwrite-pint')) {
             $input->setOption(
                 'overwrite-pint',
                 confirm('Would you like to overwrite the existing Pint configuration?')
             );
         }
 
-        if (! $input->getOption('overwrite-all') && $input->getOption('rector') && $this->rectorConfigExists($directory)) {
+        if ($input->getOption('rector') && $this->rectorConfigExists($directory) && ! $input->getOption('overwrite-rector')) {
             $input->setOption(
                 'overwrite-rector',
                 confirm('Would you like to overwrite the existing Rector configuration?')
             );
         }
 
-        if (! $input->getOption('overwrite-all') && $input->getOption('pest') && $this->pestIsInstalled($directory)) {
+        if ($input->getOption('pest') && $this->pestIsInstalled($directory) && ! $input->getOption('overwrite-pest')) {
             $input->setOption(
                 'overwrite-pest',
                 confirm('Would you like to overwrite the existing Pest configuration?')
